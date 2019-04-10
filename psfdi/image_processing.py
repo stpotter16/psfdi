@@ -11,7 +11,7 @@ from . import np
 
 def demodulate(I0, I120, I240, polar_res, polar_max):
 
-    '''
+    """
     Function demodulates phase shifted spatial frequency images and returns the the DC and AC images
 
     :param I0: Array of spatial frequency images with 0 deg phase shift. Shape (Num images, image row, image columns)
@@ -28,7 +28,7 @@ def demodulate(I0, I120, I240, polar_res, polar_max):
     :type polar_max: int
     :return: Tuple containing DC and AC images (DC, AC). Shape of DC and AC same as the phase shift image arrays
     :rtype: tuple
-    '''
+    """
 
     # DC images
     IDC = [(I0[angle, :, :] + I120[angle, :, :] + I240[angle, :, :]) / 3 for angle in range(int(polar_max / polar_res))]
@@ -41,3 +41,14 @@ def demodulate(I0, I120, I240, polar_res, polar_max):
     IAC = np.array(IAC)
 
     return IDC, IAC
+
+
+def upscale(image, new_rows, new_columns):
+
+    """
+
+    :param image:
+    :param new_rows:
+    :param new_columns:
+    :return:
+    """

@@ -11,7 +11,7 @@ from . import np
 
 def Ifiber(a0, a2, a4, phi, theta):
 
-    '''
+    """
     Compute the double cosine series solution to Mie scattering of cylindrical fibers.
 
     :param a0: a0 parameter
@@ -26,7 +26,7 @@ def Ifiber(a0, a2, a4, phi, theta):
     :type theta: ndarray
     :return: Intensity values
     :rtype: ndarray
-    '''
+    """
 
     vals = a0 + a2 * np.cos(np.deg2rad(2 * (theta - phi))) + a4 * np.cos(np.deg2rad(4 * (theta - phi)))
 
@@ -35,7 +35,7 @@ def Ifiber(a0, a2, a4, phi, theta):
 
 def syntheticIdist(a0, a2, a4, phi, theta, splay, nsamples, distribution='uniform'):
 
-    '''
+    """
     Function for generating a synthetic pSFDI signal from a distribution of fibers directions about a mean of phi.
 
     :param a0: a0 parameter
@@ -57,7 +57,7 @@ def syntheticIdist(a0, a2, a4, phi, theta, splay, nsamples, distribution='unifor
     :return: Return a periodic signal representing the summed contributions of each single fiber sample to the over all
     signal
     :rtype: ndarray
-    '''
+    """
 
     Idist = np.zeros((nsamples, len(theta)))
     for i in range(0, nsamples):
@@ -76,7 +76,7 @@ def syntheticIdist(a0, a2, a4, phi, theta, splay, nsamples, distribution='unifor
 
 def distribution_minimand(a0, a2, a4, phi, theta, data):
 
-    '''
+    """
     Function that compares a trial vector of ai cosine series parameters with given data and returns the sum of square
     differences between the quantities
 
@@ -94,7 +94,7 @@ def distribution_minimand(a0, a2, a4, phi, theta, data):
     :type data: ndarray
     :return: Sum of squared differences between cosine series using given ai parameters and data
     :rtype: float
-    '''
+    """
 
     feval = Ifiber(a0, a2, a4, phi, theta)
 
@@ -109,7 +109,7 @@ def distribution_minimand(a0, a2, a4, phi, theta, data):
 
 def distribution_minfun(params, *args):
 
-    '''
+    """
     Function for passing to scipy optimization algorithm that calls the distribution minimand. Used to find ai terms to
     fit a distribution of fibers.
 
@@ -119,6 +119,6 @@ def distribution_minfun(params, *args):
     :type args: tup`
     :return: evaluated ssd via the minimand
     :rtype: float
-    '''
+    """
 
     return distribution_minimand(params[0], params[1], params[2], params[3], *args)

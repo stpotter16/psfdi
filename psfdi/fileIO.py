@@ -172,14 +172,14 @@ def write_pSFDI_tiffs(data_dict, directory=None):
 
 def read_psfdi_mask(data_path):
 
-    '''
+    """
     This function reads and returns the data mask created during pSFDI processing in matlab
 
     :param data_path: Absolute path to data folder
     :type data_path: str
     :return: tuple of rows, columns of the mask (xrange, yrange)
     :rtype: tuple
-    '''
+    """
 
     mask_path = os.path.join(data_path, 'cmask.mat')
     mask_dict = read_mat_file(mask_path)
@@ -191,7 +191,7 @@ def read_psfdi_mask(data_path):
 
 def read_raw_psfdi(data_path, xrange, yrange, sfx_per, polar_res, polar_max):
 
-    '''
+    """
     This function reads in the raw pSFDI image data and returns 3D arrays of the image sets.
 
     :param data_path: Absolute path to data folder
@@ -208,7 +208,7 @@ def read_raw_psfdi(data_path, xrange, yrange, sfx_per, polar_res, polar_max):
     :type polar_max: int
     :return: Tuple of of image data (dark images, planar images, I0, I120, I240)
     :rtype: tuple
-    '''
+    """
 
     # Read images with no spatial frequency
     dark = read_no_sfx(data_path, xrange, yrange, polar_res, polar_max, 'dark')
@@ -224,7 +224,7 @@ def read_raw_psfdi(data_path, xrange, yrange, sfx_per, polar_res, polar_max):
 
 def read_no_sfx(data_path, xrange, yrange, polar_res, polar_max, imtype):
 
-    '''
+    """
     This function reads and crops image data that does not have a spatial frequency pattern projected on to it
 
     :param data_path: Absolute path to data folder
@@ -241,7 +241,7 @@ def read_no_sfx(data_path, xrange, yrange, polar_res, polar_max, imtype):
     :type imtype: str
     :return: Array of cropped image data
     :rtype: ndarray
-    '''
+    """
 
     # Set polar angles
     polar_angles = np.arange(0, polar_max, polar_res)
@@ -262,7 +262,7 @@ def read_no_sfx(data_path, xrange, yrange, polar_res, polar_max, imtype):
 
 def read_sfx(data_path, xrange, yrange, polar_res, polar_max, sfx_per, phase_shift):
 
-    '''
+    """
     This function reads and crops image data that does have a spatial frequency pattern projected on to it
 
     :param data_path: Absolute path to data folder
@@ -281,7 +281,7 @@ def read_sfx(data_path, xrange, yrange, polar_res, polar_max, sfx_per, phase_shi
     :type phase_shift: int
     :return: Array of cropped image data
     :rtype: ndarray
-    '''
+    """
 
     # Set polar angles
     polar_angles = np.arange(0, polar_max, polar_res)
@@ -302,7 +302,7 @@ def read_sfx(data_path, xrange, yrange, polar_res, polar_max, sfx_per, phase_shi
 #TODO - refactor this: too much functionality
 def read_SALS(data_path):
 
-    '''
+    """
     Function reads in processed SALS info written in text file by MATLAB SALSA program and return it as dictionary of
     numpy arrays that are ready for visualization
 
@@ -310,7 +310,7 @@ def read_SALS(data_path):
     :type data_path: str
     :return: Dictionary of SALS data in numpy arrays.
     :rtype: dict
-    '''
+    """
 
     # Initialize dictionary
     SALS_dict = {}

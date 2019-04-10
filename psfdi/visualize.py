@@ -14,7 +14,7 @@ from . import utilities
 
 def Ifiber_interactive(a0, a2, a4, phi, theta_min, theta_max, theta_numpts, normalize=True):
 
-    '''
+    """
     Function for interactive visualization of single fiber Mie scattering
 
     :param a0: a0 parameter
@@ -34,7 +34,7 @@ def Ifiber_interactive(a0, a2, a4, phi, theta_min, theta_max, theta_numpts, norm
     :param normalize: Bool switch on whether or not to normalize results
     :type normalize: bool
     :return:
-    '''
+    """
 
     theta = np.linspace(theta_min, theta_max, theta_numpts)
 
@@ -57,7 +57,7 @@ def Ifiber_interactive(a0, a2, a4, phi, theta_min, theta_max, theta_numpts, norm
 def Idistribution_compare_interactive(a0, a2, a4, phi0, theta_min, theta_max, theta_numpts, splay, nsamples,
                                       distribution='uniform'):
 
-    '''
+    """
     Function for interactive visualization of single fiber Mie scattering
 
     :param a0: a0 parameter
@@ -80,7 +80,7 @@ def Idistribution_compare_interactive(a0, a2, a4, phi0, theta_min, theta_max, th
     :type nsamples: int
     :param distribution: Optional. Specify type of distribution to draw samples from. Default is uniform
     :type distribution: str
-    '''
+    """
 
     theta = np.linspace(theta_min, theta_max, theta_numpts)
 
