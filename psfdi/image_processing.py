@@ -143,6 +143,31 @@ def register(image, target_image, niters=5000, eps=1e-5):
     # Warp image
     sz = target_image.shape
 
-    registered_image = cv2.warpAffine(image, warp_matrix, (sz[1],sz[0]), flags=cv2.INTER_LINEAR + cv2.WARP_INVERSE_MAP)
+    registered_image = cv2.warpAffine(image, warp_matrix, (sz[1], sz[0]), flags=cv2.INTER_LINEAR + cv2.WARP_INVERSE_MAP)
 
     return registered_image, warp_dict
+
+
+def warp(image, warp_matrix):
+
+    """
+    Function for applying a registration warp to an image.
+
+    Typically the registration warp is found with the function register.
+
+    Warp assumes the output image size is the same as the input and uses linear interpolation
+
+    :param image: Image to be warped. A numpy array of shape (rows x columns).
+    :type image: ndarray
+    :param warp_matrix: Matrix describing warp transformation. Shape (2, 3). Data type is 32 bit float
+    :type ndarry
+    :return: Warped image as a numpy array. Shape (rows x columns)
+    :rtype: ndarray
+    """
+
+    # Warp
+    sz = image.shape
+
+    warped_image = cv2.warpAffine(image, warp_matrix, (sz[1], sz[0]), flags=cv2.INTER_LINEAR + cv2.WARP_INVERSE_MAP)
+
+    return warped_image
