@@ -298,3 +298,98 @@ def read_sfx(data_path, xrange, yrange, polar_res, polar_max, sfx_per, phase_shi
     images = images[:, :, yrange.tolist()[0]]
 
     return images
+
+#TODO - refactor this: too much functionality
+def read_SALS(data_path):
+
+    '''
+    Function reads in processed SALS info written in text file by MATLAB SALSA program and return it as dictionary of
+    numpy arrays that are ready for visualization
+
+    :param data_path: Absolute path to data text file
+    :type data_path: str
+    :return: Dictionary of SALS data in numpy arrays.
+    :rtype: dict
+    '''
+
+    # Initialize dictionary
+    SALS_dict = {}
+
+    with open(data_path) as f:
+        SALS_data = [line.rstrip('\n') for line in f]
+
+    # Parse the header data
+    header_string = SALS_data[0]
+
+    # Split the data into individual parts
+    SALS_string_data = SALS_data[1:-1:6]
+    SALS_intensity_data = SALS_data[2:-1:6]
+    SALS_odd_data = SALS_data[3:-1:6]
+    SALS_odf_data = SALS_data[4:-1:6]
+    SALS_theta_data = SALS_data[5:-1:6]
+
+    # Split pixel level data
+    # split SALS data
+    SALS_string_list = [line.split('\t') for line in SALS_string_data]
+
+    # Get variables of interest
+    SALS_PD = [row[2] for row in SALS_string_list]
+    SALS_SD = [row[6] for row in SALS_string_list]
+    x = [row[0] for row in SALS_string_list]
+    y = [row[1] for row in SALS_string_list]
+
+    # Convert strings to floats
+    SALS_PD = list(map(float, SALS_PD[0:]))
+    SALS_SD = list(map(float, SALS_SD[0:]))
+    x = list(map(float, x[0:]))
+    y = list(map(float, y[0:]))
+
+    # Convert lists to numpy arrays
+    SALS_PD = np.array(SALS_PD)
+    SALS_SD = np.array(SALS_SD)
+    x = np.array(x)
+    y = np.array(y)
+
+    # Reshape the data
+    y_step = y[1] - y[0]
+    ydim = int(np.max(y) / y_step + 1)
+    xdim = int(len(y) / ydim)
+
+    x_2d = np.reshape(x, (xdim, ydim)).T
+    y_2d = np.reshape(y[::-1], (xdim, ydim)).T
+    PD_2d = np.reshape(SALS_PD, (xdim, ydim)).T
+    PD_2d = np.rad2deg(PD_2d)  # Convert radians to degrees
+    SD_2d = np.reshape(SALS_SD, (xdim, ydim)).T
+    SD_2d = np.rad2deg(SD_2d)  # Convert radians to degrees
+
+    # Add pixel data to dict
+    SALS_dict['x'] = x_2d
+    SALS_dict['y'] = y_2d
+    SALS_dict['PD'] = PD_2d
+    SALS_dict['SD'] = SD_2d
+
+    # Split pixel level data that also depends on theta
+    # Split strings
+    SALS_intensity_list = [line.split(';') for line in SALS_intensity_data]
+    SALS_odd_list = [line.split(';') for line in SALS_odd_data]
+    SALS_odf_list = [line.split(';') for line in SALS_odf_data]
+    SALS_theta_list = [line.split(';') for line in SALS_theta_data]
+
+    # Strings to floats
+    SALS_intensity = [list(map(float, row[:-1])) for row in SALS_intensity_list]
+    SALS_odd = [list(map(float, row[:-1])) for row in SALS_odd_list]
+    SALS_odf = [list(map(float, row[:-1])) for row in SALS_odf_list]
+    SALS_theta = [list(map(float, row[:-1])) for row in SALS_theta_list]
+
+    SALS_intensity = np.array(SALS_intensity)
+    SALS_odd = np.array(SALS_odd)
+    SALS_odf = np.array(SALS_odf)
+    SALS_theta = np.array(SALS_theta)
+
+    # Add pixel/theta data to dict
+    SALS_dict['intensity'] = SALS_intensity
+    SALS_dict['odd'] = SALS_odd
+    SALS_dict['odf'] = SALS_odf
+    SALS_dict['theta'] = SALS_theta
+
+    return SALS_dict
