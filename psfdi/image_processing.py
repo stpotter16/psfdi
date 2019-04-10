@@ -96,3 +96,53 @@ def rotate(image, angle):
     image_rotated = cv2.warpAffine(image, rot_mat, (sz[1], sz[0]), flags=cv2.INTER_LINEAR + cv2.WARP_INVERSE_MAP)
 
     return image_rotated
+
+
+def register(image, target_image, niters=5000, eps=1e-5):
+
+    """
+    This function registers image to a target image by finding the warp that minimizes the correlation coefficient
+    between the warped image and the target.
+
+    The function then applies this warp the the image.
+
+    It is assumed that a euclidean model of motion describes the spatial relationship between the image and its target.
+
+    Image and target must have the same shape and size
+
+    :param image: Image to be registered. A numpy array of shape (rows x columns).
+    :type image: ndarray
+    :param target_image: Target image for registration. A numpy array of shape (rows x columns)
+    :type target_image: ndarray
+    :param niters: Optional. Max number of iterations for registration algorithm to run while trying to find the warp.
+    Default 5000
+    :type niters: int
+    :param eps: Optional. Termination condition on correlation coefficient in warp finding minimizer. Default 1e-5
+    :return: Tuple containing warped image and dictionary of warp data, i.e. correlation coefficient and warp matrix
+    :rtype: tuple
+    """
+
+    #TODO Check image and target_image are same shape and size
+
+    # Dict for holding warp info
+
+    warp_dict = {}
+
+    # Find warp
+    warp_matrix = np.eye(2, 3, dtype=np.float32)
+    warp_mode = cv2.MOTION_EUCLIDEAN
+
+    criteria = (cv2.TERM_CRITERIA_COUNT | cv2.TERM_CRITERIA_EPS, niters, eps)
+
+    (cc, warp_matrix) = cv2.findTransformECC(target_image, image, warp_matrix, warp_mode, criteria)
+
+    # Wrap warp outputs into a dict
+    warp_dict['cc'] = cc
+    warp_dict['warp'] = warp_matrix
+
+    # Warp image
+    sz = target_image.shape
+
+    registered_image = cv2.warpAffine(image, warp_matrix, (sz[1],sz[0]), flags=cv2.INTER_LINEAR + cv2.WARP_INVERSE_MAP)
+
+    return registered_image, warp_dict
