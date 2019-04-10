@@ -7,6 +7,7 @@
 """
 
 from . import np
+from . import cv2
 
 
 def demodulate(I0, I120, I240, polar_res, polar_max):
@@ -72,3 +73,26 @@ def upscale(image, new_rows, new_columns):
             image_upscaled[i, j] = val
 
     return image_upscaled
+
+
+def rotate(image, angle):
+
+    """
+    Function wraps opencv's methods for rotating an image and returning it with the same shape as the input. Linear
+    interpolation is used
+
+    :param image: Image data as numpy array. Shape (rows x columns)
+    :type image: ndarray
+    :param angle: Angle of rotation.
+    :type angle: float
+    :return: Rotated image as numpy array. Shape (rows x columns)
+    :rtype: ndarray
+    """
+
+    sz = image.shape
+
+    rot_mat = cv2.getRotationMatrix2D((sz[1] / 2, sz[0] / 2), angle, 1)
+
+    image_rotated = cv2.warpAffine(image, rot_mat, (sz[1], sz[0]), flags=cv2.INTER_LINEAR + cv2.WARP_INVERSE_MAP)
+
+    return image_rotated
