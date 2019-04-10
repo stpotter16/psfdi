@@ -46,9 +46,29 @@ def demodulate(I0, I120, I240, polar_res, polar_max):
 def upscale(image, new_rows, new_columns):
 
     """
+    Function for upscaling an image to a lower pixel resolution by using simple averaging to create new pixel values
 
-    :param image:
-    :param new_rows:
-    :param new_columns:
-    :return:
+    :param image: Image to be upscaled. Shape (rows x columns)
+    :type image: ndarray
+    :param new_rows: Number of rows in lower resolution image
+    :type new_rows: int
+    :param new_columns: Number of columns in lower resolution image
+    :type new_columns: int
+    :return: Upscaled image. Shape (new_rows x new columns)
+    :rtype: ndarray
     """
+
+    org_rows, org_columns = image.shape
+
+    row_step = int(org_rows / new_rows)
+    col_step = int(org_columns / new_columns)
+
+    image_upscaled = np.zeros((new_rows, new_columns))
+
+    for i in range(0, new_rows):
+        for j in range(0, new_columns):
+            subar = image[i * row_step: i * row_step + row_step, j * col_step: j * col_step + col_step]
+            val = np.mean(subar)
+            image_upscaled[i, j] = val
+
+    return image_upscaled
