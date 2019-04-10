@@ -215,8 +215,11 @@ def read_raw_psfdi(data_path, xrange, yrange, sfx_per, polar_res, polar_max):
     planar = read_no_sfx(data_path, xrange, yrange, polar_res, polar_max, 'planar')
 
     # Read images with spatial frequency
+    I0 = read_sfx(data_path, xrange, yrange, polar_res, polar_max, sfx_per, 0)
+    I120 = read_sfx(data_path, xrange, yrange, polar_res, polar_max, sfx_per, 120)
+    I240 = read_sfx(data_path, xrange, yrange, polar_res, polar_max, sfx_per, 240)
 
-    return dark, planar
+    return dark, planar, I0, I120, I240
 
 
 def read_no_sfx(data_path, xrange, yrange, polar_res, polar_max, imtype):
