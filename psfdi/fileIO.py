@@ -244,8 +244,48 @@ def read_no_sfx(data_path, xrange, yrange, polar_res, polar_max, imtype):
     polar_angles = np.arange(0, polar_max, polar_res)
 
     # Read in files
-    images = [cv2.imread(os.path.join(data_path, imtype+'_angle_' + str(angle) + '.tiff'), -1) for angle in
-                   polar_angles]
+    images = [cv2.imread(os.path.join(data_path, imtype+'_angle_' + str(angle) + '.tiff'), -1)
+              for angle in polar_angles]
+    # Convert to numpy array
+    images = np.array(images)
+
+    # Crop
+    # Do this in steps to avoid broadcasting issues. EVALUATE LATER
+    images = images[:, xrange.tolist()[0], :]
+    images = images[:, :, yrange.tolist()[0]]
+
+    return images
+
+
+def read_sfx(data_path, xrange, yrange, polar_res, polar_max, sfx_per, phase_shift):
+
+    '''
+    This function reads and crops image data that does have a spatial frequency pattern projected on to it
+
+    :param data_path: Absolute path to data folder
+    :type data_path: str
+    :param xrange: numpy array of row index corresponding to data mask
+    :type xrange: ndarray
+    :param yrange: numpy array of column index corresponding to  data mask
+    :type yrange: ndarray
+    :param polar_res: Resolution of polarizer used to collect images
+    :type polar_res: float
+    :param polar_max: Max angle over which polarizer was rotated
+    :type polar_max: int
+    :param sfx_per: period of spatial frequency pattern projected on the image in pixels
+    :type sfx_per: float
+    :param phase_shift: phase shift to read
+    :type phase_shift: int
+    :return: Array of cropped image data
+    :rtype: ndarray
+    '''
+
+    # Set polar angles
+    polar_angles = np.arange(0, polar_max, polar_res)
+
+    # Read in files
+    images = [cv2.imread(os.path.join(data_path, 'V_sf_' + str(sfx_per) + '_pha_' + str(phase_shift) + '_angle_'
+                                      + str(angle) + '.tiff'), -1) for angle in polar_angles]
     # Convert to numpy array
     images = np.array(images)
 
