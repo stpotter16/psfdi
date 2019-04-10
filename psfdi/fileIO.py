@@ -202,10 +202,10 @@ def read_raw_psfdi(data_path, xrange, yrange, sfx_per, polar_res, polar_max):
     :type yrange: ndarray
     :param sfx_per: Period of the spatial frequency images to load
     :type sfx_per: float
-    :param polar_max: Max angle over which polarizer was rotated
-    :type polar_max: int
     :param polar_res: Resolution of polarizer used to collect images
     :type polar_res: float
+    :param polar_max: Max angle over which polarizer was rotated
+    :type polar_max: int
     :return: Tuple of of image data (dark images, planar images, I0, I120, I240)
     :rtype: tuple
     '''
