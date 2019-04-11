@@ -22,3 +22,4 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 from scipy.ndimage import sobel
 from scipy.stats import sem
 from matplotlib import patches
+from scipy.stats import beta
