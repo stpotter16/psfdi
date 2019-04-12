@@ -209,7 +209,6 @@ def compare_raw_interactive(row, col, psfdi_data, name, SALS_data):
     ax1.plot(np.deg2rad(theta), gamma, color='r', label='SALS ODF');
     ax1.set_ylim([0, 0.25])
     ax1.set_title('SALS ODF')
-    fig.suptitle('Polar Plots of Intensity and SALS ODF')
 
     # Plot Cartesian
     fig, (ax0, ax1) = plt.subplots(2, 1, figsize=(15, 15))
@@ -228,4 +227,3 @@ def compare_raw_interactive(row, col, psfdi_data, name, SALS_data):
     ax1.set_xlabel('Theta');
     ax1.autoscale(enable=True, axis='x', tight=True);
     ax1.set_title('SALS ODF')
-    fig.suptitle('Cartesian Plots of Intensity and SALS ODF');
