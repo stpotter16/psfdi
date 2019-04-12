@@ -308,3 +308,31 @@ def compute_fourier(an, bn, c, theta):
         series_sum = 0.0
 
     return computed
+
+
+def structural_eigenval_thetas(a1, b1):
+
+    """
+    Function forms the 2nd order structural tensor from the a1 and b1 Fourier series fit terms, computes the
+    eigenvalues, then computes the angle of the associated eigenvectors
+
+    :param a1: First cosine coefficient from Fourier series fit
+    :type a1: float
+    :param b1: First sine coefficient from Fourier series fit
+    :type b1: float
+    :return: tuple of first and second eigenvector angles
+    :rtype: tuple
+    """
+
+    # For structural tensor
+    D2 = np.array([[a1, b1],
+                   [b1, -a1]])
+
+    # Compute the eigenvalues and eigenvectors
+    eigvals, eigvecs = np.linalg.eig(D2)
+
+    # Compute the eigenvector angles
+    theta1 = np.arctan2(eigvecs[1, 0], eigvecs[0, 0])
+    theta2 = np.arctan2(eigvecs[1, 1], eigvecs[0, 1])
+
+    return (np.rad2deg(theta1), np.rad2deg(theta2))
