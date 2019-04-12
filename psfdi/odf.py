@@ -198,3 +198,113 @@ def compute_gamma(mean1, sd1, mean2, sd2, theta, d=0.5):
         gamma_area += 0.5 * (gamma[i] + gamma[i - 1]) * (theta[i] - theta[i - 1])
 
     return gamma / gamma_area
+
+
+def compute_an(order, gamma, theta):
+
+    """
+    This function computes the cosine coefficients of a Fourier series approximation to data gamma evaluated at
+    independent variable values theta. Fourier series coefficients are computed up to specified order
+
+    :param order: Order of Fourier series approximation
+    :type order: int
+    :param gamma: Dependent variable of data series to fit
+    :type gamma. ndarray
+    :param theta: Independent variable of data series to fit
+    :type theta: ndarray
+    :return: Cosine coefficient of specified order
+    :rtype: float
+    """
+
+    #TODO-remove for loop
+    coeff = 0.0
+    for i in range(1, len(theta)):
+        coeff += 0.5 * (gamma[i] * np.cos(order * theta[i]) + gamma[i - 1] * np.cos(order * theta[i - 1])) * (
+                    theta[i] - theta[i - 1])
+
+    return 2 * coeff
+
+
+def compute_bn(order, gamma, theta):
+
+    """
+    This function computes the sine coefficients of a Fourier series approximation to data gamma evaluated at
+    independent variable values theta. Fourier series coefficients are computed up to specified order
+
+    :param order: Order of Fourier series approximation
+    :type order: int
+    :param gamma: Dependent variable of data series to fit
+    :type gamma. ndarray
+    :param theta: Independent variable of data series to fit
+    :type theta: ndarray
+    :return: Sine coefficient of specified order
+    :rtype: float
+    """
+
+    #TODO-remove for loop
+    coeff = 0.0
+    for i in range(1, len(theta)):
+        coeff += 0.5 * (gamma[i] * np.sin(order * theta[i]) + gamma[i - 1] * np.sin(order * theta[i - 1])) * (
+                    theta[i] - theta[i - 1])
+
+    return 2 * coeff
+
+
+def fit_fourier(max_order, gamma, theta):
+
+    """
+    This function computes Fourier series coefficients for an approximation to the given (theta, gamma) data series up
+    to the specified maximum order
+
+    :param max_order: Maximum order of Fourier series approximation
+    :type max_order: int
+    :param gamma: Dependent variable of data series to fit
+    :type gamma. ndarray
+    :param theta: Independent variable of data series to fit
+    :type theta: ndarray
+    :return: Tuple containing coefficients (an, bn, c). C is the leading constant coefficient.
+    :rtype: tuple
+    """
+    # Compute an
+    an = [compute_an(order, gamma, theta) for order in range(2, max_order, 2)]
+
+    # Compute bn
+    bn = [compute_bn(order, gamma, theta) for order in range(2, max_order, 2)]
+
+    # Compute c
+    c = 0.0
+    for i in range(1, len(theta)):
+        c += 0.5 * (gamma[i] + gamma[i - 1]) * (theta[i] - theta[i - 1])
+
+    return an, bn, c
+
+
+def compute_fourier(an, bn, c, theta):
+
+    """
+    This function evaluates a Fourier series approximation at given independent variable theta
+
+    :param an: Cosine coefficients
+    :type an: list like
+    :param bn: Sine coefficients
+    :type bn: list like
+    :param c: Constant coefficient
+    :type c: float
+    :param theta: Independent variable
+    :type theta: ndarray
+    :return: Array of evaluated Fourier seriesA
+    :rtype: ndarray
+    """
+
+    # Pre-allocate
+    computed = np.zeros(len(theta))
+
+    # Compute series
+    series_sum = 0.0
+    for i in range(0, len(theta)):
+        for j in range(0, len(an)):
+            series_sum += an[j] * np.cos(2 * (j + 1) * theta[i]) + bn[j] * np.sin(2 * (j + 1) * theta[i])
+        computed[i] = c / (2 * np.pi) * (1 + series_sum)
+        series_sum = 0.0
+
+    return computed
