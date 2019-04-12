@@ -178,6 +178,7 @@ def compare_raw_interactive(row, col, psfdi_data, name, SALS_data):
     ax2.add_patch(rect)
     ax2.set_title('SALS SD - Pixel Location in Black');
 
+    #TODO - This is wrong to set theta this way. Better would be to use theta values recorded in SALS
     theta = np.linspace(0, 360, 360)
 
     # Plot pSFDI intensity of single pixel
