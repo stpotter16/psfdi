@@ -117,7 +117,7 @@ def Idistribution_compare_interactive(a0, a2, a4, phi0, theta_min, theta_max, th
     plt.xlabel('phi')
 
 
-def compare_raw_interactive(row, col, psfdi_data, name, SALS_data):
+def compare_raw_interactive(row, col, psfdi_data, name, SALS_data, roll=None):
 
     """
     This function is used to visualize and compare pSFDI intensity data and pSFDI ODF
@@ -133,6 +133,7 @@ def compare_raw_interactive(row, col, psfdi_data, name, SALS_data):
     :type name: str
     :param SALS_data: Dictionary of SALS data used for comparison.
     :type SALS_data: dict
+    :param roll: Optional. Argument to pass to
     """
 
     # Get SALS data
@@ -194,6 +195,8 @@ def compare_raw_interactive(row, col, psfdi_data, name, SALS_data):
         for col in range(psfdi_col, psfdi_col + col_step):
             temp = psfdi_data[:, row, col]
             temp = np.append(temp, temp)
+            if roll:
+                temp = np.roll(temp, roll)
             sub_psfdi[sub_row, :] = temp
             sub_row += 1
 
@@ -205,7 +208,7 @@ def compare_raw_interactive(row, col, psfdi_data, name, SALS_data):
     ax0.plot(np.deg2rad(psfdi_theta), sub_psfdi_mean, linestyle='--', marker='o', color='g',
              label='Mean Fiber Intensity');
     ax0.set_title('Mean pSFDI Raw Fiber Distribution Intensity In SALS Beam ROI - {} Data'.format(name));
-    ax0.set_ylim([12100, 12250])
+    ax0.set_ylim([0.975 * np.min(sub_psfdi_mean), 1.025 * np.max(sub_psfdi_mean)])
 
     ax1.plot(np.deg2rad(theta), gamma, color='r', label='SALS ODF');
     ax1.set_ylim([0, 0.25])
