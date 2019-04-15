@@ -228,3 +228,115 @@ def compare_raw_interactive(row, col, psfdi_data, name, SALS_data):
     ax1.set_xlabel('Theta');
     ax1.autoscale(enable=True, axis='x', tight=True);
     ax1.set_title('SALS ODF')
+
+
+# TODO - make this more flexible with plotting options
+def compare_raw_interactive_360(row, col, psfdi_data, name, SALS_data):
+
+    """
+    This function is used to visualize and compare pSFDI intensity data and pSFDI ODF over full 360 degrees
+
+    :param row: Row number of comparison pixel in SALS data
+    :type row: int
+    :param col: Column number of comparison pixel in SALS data
+    :type col: int
+    :param psfdi_data: Multidimensional array of raw pSFDI intensity data.
+    Shape (Number of polarizer steps x rows x columns)
+    :type psfdi_data: ndarray
+    :param name: String used to make plot titles. Should be either 'DC' or 'AC' depending on data imaged
+    :type name: str
+    :param SALS_data: Dictionary of SALS data used for comparison.
+    :type SALS_data: dict
+    """
+
+    # Get SALS data
+    PD_2d = SALS_data['PD']
+    SD_2d = SALS_data['SD']
+    SALS_odf = SALS_data['odf']
+
+    # define ydim as number of rows
+    ydim = PD_2d.shape[0]
+
+    # Define row step and column step. Note psfdi_data is three dimensional
+    row_step = int(psfdi_data.shape[1] / PD_2d.shape[0])
+    col_step = int(psfdi_data.shape[2] / PD_2d.shape[1])
+
+    # Get the correct rectangle start indices
+    psfdi_row = row * row_step
+    psfdi_col = col * col_step
+
+    # Plot images
+    fig, (ax0, ax1, ax2) = plt.subplots(1, 3, figsize=(20, 20))
+    im0 = ax0.imshow(psfdi_data[0, :, :], cmap='gray')
+    rect = patches.Rectangle((psfdi_col, psfdi_row), row_step, col_step, edgecolor='r', facecolor='r')
+    ax0.add_patch(rect)
+    ax0.set_title('pSFDI {} data - Pixel Location in Red'.format(name))
+
+    im1 = ax1.imshow(PD_2d, cmap='hsv')
+    divider = make_axes_locatable(ax1)
+    cax1 = divider.append_axes('right', size='5%', pad=0.05)
+    colorlimits = (0, 180);
+    im1.set_clim(colorlimits)
+    fig.colorbar(im1, cax=cax1)
+    rect = patches.Rectangle((col, row), 1, 1, edgecolor='k', facecolor='k')
+    ax1.add_patch(rect)
+    ax1.set_title('SALS PD - Pixel Location in Black');
+
+    im2 = ax2.imshow(SD_2d, cmap='jet')
+    divider = make_axes_locatable(ax2)
+    cax2 = divider.append_axes('right', size='5%', pad=0.05)
+    colorlimits = (45, 55);
+    im2.set_clim(colorlimits)
+    fig.colorbar(im2, cax=cax2)
+    rect = patches.Rectangle((col, row), 1, 1, edgecolor='k', facecolor='k')
+    ax2.add_patch(rect)
+    ax2.set_title('SALS SD - Pixel Location in Black');
+
+    theta = np.rad2deg(SALS_data['theta'])
+
+    # Plot pSFDI intensity of single pixel
+    idist = psfdi_data[:, psfdi_row, psfdi_col]
+    psfdi_theta = np.arange(0, 360, int(360 / len(idist)))
+    gamma = SALS_odf[col * ydim + (ydim - col), :]
+
+    # Plot average pSFDI intensity within SALS beam ROI
+    sub_psfdi = np.zeros((row_step * col_step, len(psfdi_theta)))
+    sub_row = 0
+    for row in range(psfdi_row, psfdi_row + row_step):
+        for col in range(psfdi_col, psfdi_col + col_step):
+            temp = psfdi_data[:, row, col]
+            temp = np.append(temp, temp)
+            sub_psfdi[sub_row, :] = temp
+            sub_row += 1
+
+    sub_psfdi_mean = np.mean(sub_psfdi, axis=0)
+    sub_psfdi_sem = sem(sub_psfdi, axis=0)
+
+    # Plot Polar
+    fig, (ax0, ax1) = plt.subplots(1, 2, figsize=(15, 15), subplot_kw=dict(projection='polar'))
+    ax0.plot(np.deg2rad(psfdi_theta), sub_psfdi_mean, linestyle='--', marker='o', color='g',
+             label='Mean Fiber Intensity');
+    ax0.set_title('Mean pSFDI Raw Fiber Distribution Intensity In SALS Beam ROI - {} Data'.format(name));
+    ax0.set_ylim([12100, 12250])
+
+    ax1.plot(np.deg2rad(theta), gamma, color='r', label='SALS ODF');
+    ax1.set_ylim([0, 0.25])
+    ax1.set_title('SALS ODF')
+
+    # Plot Cartesian
+    fig, (ax0, ax1) = plt.subplots(2, 1, figsize=(15, 15))
+    ax0.plot(psfdi_theta, sub_psfdi_mean, linestyle='--', marker='o', color='g', label='Mean Fiber Intensity');
+    ax0.fill_between(psfdi_theta, sub_psfdi_mean + sub_psfdi_sem, sub_psfdi_mean - sub_psfdi_sem, color='gray',
+                     alpha=0.2);
+    ax0.set_xlabel('Theta')
+    ax0.set_ylabel('Intensity [a.u.]');
+    ax0.autoscale(enable=True, axis='x', tight=True)
+    ax0.legend()
+    ax0.set_title('Mean p/m pSFDI Raw Fiber Distribution Intensity In SALS Beam ROI - {} Data'.format(name));
+
+    ax1.plot(theta, gamma, color='r', label='SALS ODF');
+    ax1.legend();
+    ax1.set_ylabel('Gamma(theta)')
+    ax1.set_xlabel('Theta');
+    ax1.autoscale(enable=True, axis='x', tight=True);
+    ax1.set_title('SALS ODF')
