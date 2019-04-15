@@ -253,6 +253,7 @@ def compare_raw_interactive_360(row, col, psfdi_data, name, SALS_data):
     PD_2d = SALS_data['PD']
     SD_2d = SALS_data['SD']
     SALS_odf = SALS_data['odf']
+    SALS_theta = SALS_data['theta']
 
     # define ydim as number of rows
     ydim = PD_2d.shape[0]
@@ -292,12 +293,11 @@ def compare_raw_interactive_360(row, col, psfdi_data, name, SALS_data):
     ax2.add_patch(rect)
     ax2.set_title('SALS SD - Pixel Location in Black');
 
-    theta = np.rad2deg(SALS_data['theta'])
-
     # Plot pSFDI intensity of single pixel
     idist = psfdi_data[:, psfdi_row, psfdi_col]
     psfdi_theta = np.arange(0, 360, int(360 / len(idist)))
     gamma = SALS_odf[col * ydim + (ydim - col), :]
+    theta = np.rad2deg(SALS_theta[col * ydim + (ydim - col), :])
 
     # Plot average pSFDI intensity within SALS beam ROI
     sub_psfdi = np.zeros((row_step * col_step, len(psfdi_theta)))
@@ -305,7 +305,6 @@ def compare_raw_interactive_360(row, col, psfdi_data, name, SALS_data):
     for row in range(psfdi_row, psfdi_row + row_step):
         for col in range(psfdi_col, psfdi_col + col_step):
             temp = psfdi_data[:, row, col]
-            temp = np.append(temp, temp)
             sub_psfdi[sub_row, :] = temp
             sub_row += 1
 
