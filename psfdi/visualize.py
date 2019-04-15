@@ -316,7 +316,7 @@ def compare_raw_interactive_360(row, col, psfdi_data, name, SALS_data):
     ax0.plot(np.deg2rad(psfdi_theta), sub_psfdi_mean, linestyle='--', marker='o', color='g',
              label='Mean Fiber Intensity');
     ax0.set_title('Mean pSFDI Raw Fiber Distribution Intensity In SALS Beam ROI - {} Data'.format(name));
-    ax0.set_ylim([12100, 12250])
+    ax0.set_ylim([0.975 * np.min(sub_psfdi_mean), 1.025 * np.max(sub_psfdi_mean)])
 
     ax1.plot(np.deg2rad(theta), gamma, color='r', label='SALS ODF');
     ax1.set_ylim([0, 0.25])
