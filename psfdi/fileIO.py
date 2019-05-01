@@ -358,8 +358,10 @@ def read_SALS(data_path):
     x_2d = np.reshape(x, (xdim, ydim)).T
     y_2d = np.reshape(y[::-1], (xdim, ydim)).T
     PD_2d = np.reshape(SALS_PD, (xdim, ydim)).T
+    PD_2d = np.flip(PD_2d)  # Reverse top to bottom order
     PD_2d = np.rad2deg(PD_2d)  # Convert radians to degrees
     SD_2d = np.reshape(SALS_SD, (xdim, ydim)).T
+    SD_2d = np.flip(SD_2d)  # Reverse top to bottom order
     SD_2d = np.rad2deg(SD_2d)  # Convert radians to degrees
 
     # Add pixel data to dict
