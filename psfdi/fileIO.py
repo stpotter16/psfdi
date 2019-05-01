@@ -357,12 +357,13 @@ def read_SALS(data_path):
 
     x_2d = np.reshape(x, (xdim, ydim)).T
     y_2d = np.reshape(y[::-1], (xdim, ydim)).T
-    PD_2d = np.reshape(SALS_PD, (xdim, ydim)).T
-    PD_2d = np.flip(PD_2d)  # Reverse top to bottom order
-    PD_2d = np.rad2deg(PD_2d)  # Convert radians to degrees
-    SD_2d = np.reshape(SALS_SD, (xdim, ydim)).T
-    SD_2d = np.flip(SD_2d)  # Reverse top to bottom order
-    SD_2d = np.rad2deg(SD_2d)  # Convert radians to degrees
+    # Fill PD/SD and maintain correct x/y to row/col correspondence
+    PD_2d = np.zeros((ydim, xdim))
+    SD_2d = np.zeros((ydim, xdim))
+    for col in range(0, ydim):
+        start = col * ydim
+        PD_2d[:, col] = np.rad2deg(SALS_PD[start:start + ydim])[::-1]
+        SD_2d[:, col] = np.rad2deg(SALS_SD[start:start + ydim])[::-1]
 
     # Add pixel data to dict
     SALS_dict['x'] = x_2d
