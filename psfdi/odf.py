@@ -540,3 +540,142 @@ def minfunWrappedNormal(params, *args):
     """
 
     return minimandWrappedNormal(params[0], params[1], params[2], *args)
+
+
+def beta_dist(mean, sd):
+
+    """
+    Generate a beta distribution using a mean and standard deviation based on the [-pi/2, pi/2] interval
+
+    :param mean: Mean of beta distribution. Radian value in interval [-pi/2, pi/2]
+    :type mean: float
+    :param sd: Standard deviation of beta distribution. Radian value in interval [0, pi/2]
+    :type sd: float
+    :return: Instance of the scipy beta random variable class
+    :rtype: rv_continous.beta
+    """
+
+    # Map mean and standard deviation to [0, 1] range of the standard beta distribution
+    mu = (mean + np.pi / 2) / np.pi
+    sigma = sd / np.pi
+
+    # Compute the shape parameters
+    gamma = (mu ** 2 - mu ** 3 - sigma ** 2 * mu) / (sigma ** 2)
+    delta = gamma * (1 - mu) / mu
+
+    cv = beta(gamma, delta)
+
+    return cv
+
+
+def IfiberBetaInterval(a0, a2, a4, phi, theta):
+
+    """
+    Compute the double cosine series solution to Mie scattering of cylindrical fibers with radian inputs. Thetas are
+    mapped to the [0, 1] interval to make them compatible.
+
+    :param a0: a0 parameter
+    :type a0: float
+    :param a2: a2 parameter
+    :type a2: float
+    :param a4: a4 parameter
+    :type a4: float
+    :param phi: preferred fiber direction in degrees
+    :type phi: float
+    :param theta: Values of theta at which to evaluate the cosine series. Values in radians
+    :type theta: ndarray
+    :return: Intensity values
+    :rtype: ndarray
+    """
+
+    thetaRad = theta * np.pi - np.pi / 2 * np.ones(len(theta))
+
+    return IfiberRad(a0, a2, a4, phi, thetaRad)
+
+
+def IdistBeta(a0, a2, a4, phi, thetas, dist):
+
+    """
+    Simulate signal intensity resulting from the convolution of a single fiber with a beta distribution
+
+    :param a0: a0 parameter
+    :type a0: float
+    :param a2: a2 parameter
+    :type a2: float
+    :param a4: a4 parameter
+    :type a4: float
+    :param phi: preferred fiber direction in degrees
+    :type phi: float
+    :param thetas: Values of theta at which to evaluate the cosine series. Values in radians
+    :type thetas: ndarray
+    :param dist: Values of the wrapped normal pdf at the theta values
+    :type dist: ndarray
+    :return: Distribution intensity values
+    :rtype: ndarray
+    """
+
+    Ifiber = IfiberBetaInterval(a0, a2, a4, phi, thetas)
+
+    dist_y = dist.pdf(thetas)
+
+    delta = thetas[1] - thetas[0]
+
+    return fftconvolve(dist_y, Ifiber, 'same') * delta
+
+
+def minimand(a0, a2, a4, phi, thetas, dist, data):
+
+    """
+    Minimand for computing the sum of squared differences between a fit beta distribution intensity signal and measured
+    data
+
+    :param a0: a0 parameter
+    :type a0: float
+    :param a2: a2 parameter
+    :type a2: float
+    :param a4: a4 parameter
+    :type a4: float
+    :param phi: preferred fiber direction in degrees
+    :type phi: float
+    :param thetas: Values of theta at which to evaluate the cosine series. Values in radians
+    :type thetas: ndarray
+    :param dist: Values of the beta pdf at the theta values
+    :type dist: ndarray
+    :param data: Measured signal array
+    :type data: ndarray
+    :return: Sum of square difference between data and proposed fit distribution.
+    :rtype: float
+    """
+
+    guess = IdistBeta(a0, a2, a4, phi, thetas, dist)
+
+    guess_interp = interp1d(thetas, guess)
+
+    # Scale the measured psfdi points to the [0, 1] interval
+    scaled_data = (data[:, 0] + np.pi / 2 * np.ones(len(data))) / np.pi
+    scaled_data = np.round(scaled_data, 3)  # This isn't the best approach, but okay for now
+
+    feval = guess_interp(scaled_data)
+
+    diff = data[:, 1] - feval
+
+    diffsq = np.square(diff, diff)
+
+    ssd = np.sum(diffsq)
+
+    return ssd
+
+
+def minfun(params, *args):
+
+    """
+    Wrapper function for beta fitting minimand. This function is to be passed to Scipy's minimization functions
+
+    :param params: List of minimization parameters: a0, a2, a4
+    :type params: list, ndarray
+    :param args: Tuple containing necessary arguments to ellipse minimand: (Phi, Thetas, Distribution, Signal)
+    :type args: tuple
+    :return: Sum of square difference between data and proposed fit distribution.
+    :rtype: float
+    """
+    return minimand(params[0], params[1], params[2], *args)
