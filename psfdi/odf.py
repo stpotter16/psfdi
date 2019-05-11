@@ -335,4 +335,72 @@ def structural_eigenval_thetas(a1, b1):
     theta1 = np.arctan2(eigvecs[1, 0], eigvecs[0, 0])
     theta2 = np.arctan2(eigvecs[1, 1], eigvecs[0, 1])
 
-    return (np.rad2deg(theta1), np.rad2deg(theta2))
+    return np.rad2deg(theta1), np.rad2deg(theta2)
+
+
+def ellipse(b, e, phi, theta):
+
+    """
+    Compute the value of an ellipse with specified radius, eccentricity, and angular rotation at specified angle
+
+    :param b: Ellipse minor axis radius. Value in the interval [0, inf]
+    :type b: float
+    :param e: Ellipse eccentricity. Bounded value in the interval [0, 1]
+    :type e: float
+    :param phi: Angular offset of ellipse major axis. Radian value in interval [0, 2pi]
+    :type phi: float
+    :param theta: Angular argument of ellipse. Radian value in interval [0, 2pi]
+    :type theta: float
+    :return: Radius of ellipse.
+    :rtype: float
+    """
+
+    rval = b / np.sqrt(1 - (e * np.cos(theta - phi)) ** 2)
+
+    return rval
+
+
+def minellipse(b, e, phi, theta, signal):
+
+    """
+    Minimand for computing the sum of squared differences between a fit ellipse and ellipsoidal data. Used for fitting
+    ellipse model
+
+    :param b: Ellipse minor axis radius. Value in the interval [0, inf]
+    :type b: float
+    :param e: Ellipse eccentricity. Bounded value in the interval [0, 1]
+    :type e: float
+    :param phi: Angular offset of ellipse major axis. Radian value in interval [0, 2pi]
+    :type phi: float
+    :param theta: Array of angular argument of ellipse. Radian values in interval [0, 2pi]
+    :type theta: ndarray
+    :param signal: Ellipsoidal data to compute the sum of squared differences against.
+    :type signal: ndarray
+    :return: Sum of square difference between data and proposed ellipse.
+    :rtype: float
+    """
+
+    ellipsepts = ellipse(b, e, phi, theta)
+
+    diff = signal - ellipsepts
+
+    diffsq = np.square(diff, diff)
+
+    ssd = np.sum(diffsq)
+
+    return ssd
+
+
+def minellipsefun(params, *args):
+
+    """
+    Wrapper function for ellipse fitting minimand. This function is to be passed to Scipy's minimization functions
+
+    :param params: List of minimization parameters: b, e, phi
+    :type params: list, ndarray
+    :param args: Tuple containing necessary arguments to ellipse minimand: (Thetas, Signal)
+    :type args: tuple
+    :return: Sum of square difference between data and proposed ellipse.
+    :rtype: float
+    """
+    return minellipse(params[0], params[1], params[2], *args)
