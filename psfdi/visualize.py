@@ -41,7 +41,7 @@ def Ifiber_interactive(a0, a2, a4, phi, theta_min, theta_max, theta_numpts, norm
 
     theta = np.linspace(theta_min, theta_max, theta_numpts)
 
-    vals = odf.Ifiber(a0, a2, a4, phi, theta)
+    vals = odf.IfiberDeg(a0, a2, a4, phi, theta)
 
     if normalize:
         vals = utilities.normalize_1d(vals)
@@ -94,12 +94,12 @@ def Idistribution_compare_interactive(a0, a2, a4, phi0, theta_min, theta_max, th
         phis = np.random.normal(0, splay, nsamples)
     for i in range(0, nsamples):
         phi = phis[i]
-        vals = odf.Ifiber(a0, a2, a4, phi, theta)
+        vals = odf.IfiberDeg(a0, a2, a4, phi, theta)
         Idist[i, :] = vals
 
     Idist = np.sum(Idist, axis=0) / nsamples
 
-    Ifibers = odf.Ifiber(a0, a2, a4, phi0, theta)
+    Ifibers = odf.IfiberDeg(a0, a2, a4, phi0, theta)
 
     fig = plt.figure(figsize=(10, 10))
     plt.plot(theta, Ifibers, color='g', label='Single Fiber Intensity');

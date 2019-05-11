@@ -23,3 +23,5 @@ from scipy.ndimage import sobel
 from scipy.stats import sem
 from matplotlib import patches
 from scipy.stats import beta
+from scipy.interpolate import interp1d
+from scipy.signal import fftconvolve

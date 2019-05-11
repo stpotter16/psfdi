@@ -8,12 +8,14 @@
 
 from . import np
 from . import beta
+from . import interp1d
+from . import fftconvolve
 
 
-def Ifiber(a0, a2, a4, phi, theta):
+def IfiberDeg(a0, a2, a4, phi, theta):
 
     """
-    Compute the double cosine series solution to Mie scattering of cylindrical fibers.
+    Compute the double cosine series solution to Mie scattering of cylindrical fibers with degree inputs
 
     :param a0: a0 parameter
     :type a0: float
@@ -34,7 +36,7 @@ def Ifiber(a0, a2, a4, phi, theta):
     return vals
 
 
-def syntheticIdist(a0, a2, a4, phi, theta, splay, nsamples, distribution='uniform'):
+def syntheticIdistNormal(a0, a2, a4, phi, theta, splay, nsamples, distribution='uniform'):
 
     """
     Function for generating a synthetic pSFDI signal from a distribution of fibers directions about a mean of phi.
@@ -67,7 +69,7 @@ def syntheticIdist(a0, a2, a4, phi, theta, splay, nsamples, distribution='unifor
         elif distribution == 'normal':
             phi = np.random.normal(0, splay)
 
-        vals = Ifiber(a0, a2, a4, phi, theta)
+        vals = IfiberDeg(a0, a2, a4, phi, theta)
         Idist[i, :] = vals
 
     Idist = np.sum(Idist, axis=0) / nsamples
@@ -97,7 +99,7 @@ def distribution_minimand(a0, a2, a4, phi, theta, data):
     :rtype: float
     """
 
-    feval = Ifiber(a0, a2, a4, phi, theta)
+    feval = IfiberDeg(a0, a2, a4, phi, theta)
 
     diff = data - feval
 
@@ -404,3 +406,137 @@ def minellipsefun(params, *args):
     :rtype: float
     """
     return minellipse(params[0], params[1], params[2], *args)
+
+
+def wrapped_normal(mu, sigma, period, thetas):
+
+    """
+    Compute a wrapped normal distribution with specified mean and standard deviation. Also allows specification of the
+    wrapping period used to generate the wrapped pdf.
+
+    :param mu: Mean of wrapped normal distribution. Radian value in interval [-pi/2, pi/2]
+    :type mu: float
+    :param sigma: Standard deviation of wrapped normal distribution. Radian value in interval [0, pi/2]
+    :type sigma: float
+    :param period: Period of shift used to compute the sum that generates the wrapped pdf.
+    :type period: float
+    :param thetas: Radian angular values at which to compute the wrapped pdf
+    :type thetas: float
+    :return: Array of wrapped normal pdf values
+    :rtype: ndarray
+    """
+
+    shifts = np.arange(-1000, 1001, 1)  # Make end one more than beginning so symmetry is preserved
+
+    wn = [np.exp(-1 * (thetas - (mu - period * shift) * np.ones(len(thetas))) ** 2 / (2 * sigma ** 2)) for
+                      shift in shifts]
+
+    wn = 1 / (sigma * np.sqrt(period)) * np.sum(np.array(wn), axis=0)
+
+    return wn
+
+
+def IfiberRad(a0, a2, a4, phi, theta):
+
+    """
+    Compute the double cosine series solution to Mie scattering of cylindrical fibers with radian inputs
+
+    :param a0: a0 parameter
+    :type a0: float
+    :param a2: a2 parameter
+    :type a2: float
+    :param a4: a4 parameter
+    :type a4: float
+    :param phi: preferred fiber direction in degrees
+    :type phi: float
+    :param theta: Values of theta at which to evaluate the cosine series. Values in radians
+    :type theta: ndarray
+    :return: Intensity values
+    :rtype: ndarray
+    """
+
+    rv = a0 + a2 * np.cos(2 * (theta - phi)) + a4 * np.cos(4 * (theta - phi))
+
+    return rv
+
+
+def IdistWrappedNormal(a0, a2, a4, phi, thetas, dist):
+
+    """
+    Simulate signal intensity resulting from the convolution of a single fiber with a wrapped normal distribution
+
+    :param a0: a0 parameter
+    :type a0: float
+    :param a2: a2 parameter
+    :type a2: float
+    :param a4: a4 parameter
+    :type a4: float
+    :param phi: preferred fiber direction in degrees
+    :type phi: float
+    :param thetas: Values of theta at which to evaluate the cosine series. Values in radians
+    :type thetas: ndarray
+    :param dist: Values of the wrapped normal pdf at the theta values
+    :type dist: ndarray
+    :return: Distribution intensity values
+    :rtype: ndarray
+    """
+
+    fiber = IfiberRad(a0, a2, a4, phi, thetas)
+
+    delta = thetas[1] - thetas[0]
+
+    return fftconvolve(dist, fiber, 'same') * delta
+
+
+def minimandWrappedNormal(a0, a2, a4, phi, thetas, dist, data):
+
+    """
+    Minimand for computing the sum of squared differences between a fit wrapped normal intensity signal and measured
+    data
+
+    :param a0: a0 parameter
+    :type a0: float
+    :param a2: a2 parameter
+    :type a2: float
+    :param a4: a4 parameter
+    :type a4: float
+    :param phi: preferred fiber direction in degrees
+    :type phi: float
+    :param thetas: Values of theta at which to evaluate the cosine series. Values in radians
+    :type thetas: ndarray
+    :param dist: Values of the wrapped normal pdf at the theta values
+    :type dist: ndarray
+    :param data: Measured signal array
+    :type data: ndarray
+    :return: Sum of square difference between data and proposed fit distribution.
+    :rtype: float
+    """
+    guess = IdistWrappedNormal(a0, a2, a4, phi, thetas, dist)
+
+    guess_interp = interp1d(thetas, guess)
+
+    feval = guess_interp(data[:, 0])
+
+    diff = data[:, 1] - feval
+
+    diffsq = np.square(diff, diff)
+
+    ssd = np.sum(diffsq)
+
+    return ssd
+
+
+def minfunWrappedNormal(params, *args):
+
+    """
+    Wrapper function for wrapped normal fitting minimand. This function is to be passed to Scipy's minimization functions
+
+    :param params: List of minimization parameters: a0, a2, a4
+    :type params: list, ndarray
+    :param args: Tuple containing necessary arguments to ellipse minimand: (Phi, Thetas, Distribution, Signal)
+    :type args: tuple
+    :return: Sum of square difference between data and proposed fit distribution.
+    :rtype: float
+    """
+
+    return minimandWrappedNormal(params[0], params[1], params[2], *args)
