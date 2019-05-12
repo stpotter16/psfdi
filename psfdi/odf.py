@@ -10,6 +10,7 @@ from . import np
 from . import beta
 from . import interp1d
 from . import fftconvolve
+from . import trapz
 
 
 def IfiberDeg(a0, a2, a4, phi, theta):
@@ -623,7 +624,7 @@ def IdistBeta(a0, a2, a4, phi, thetas, dist):
     return fftconvolve(dist_y, Ifiber, 'same') * delta
 
 
-def minimand(a0, a2, a4, phi, thetas, dist, data):
+def minimandBeta(a0, a2, a4, phi, thetas, dist, data):
 
     """
     Minimand for computing the sum of squared differences between a fit beta distribution intensity signal and measured
@@ -666,7 +667,7 @@ def minimand(a0, a2, a4, phi, thetas, dist, data):
     return ssd
 
 
-def minfun(params, *args):
+def minfunBeta(params, *args):
 
     """
     Wrapper function for beta fitting minimand. This function is to be passed to Scipy's minimization functions
@@ -678,4 +679,105 @@ def minfun(params, *args):
     :return: Sum of square difference between data and proposed fit distribution.
     :rtype: float
     """
-    return minimand(params[0], params[1], params[2], *args)
+    return minimandBeta(params[0], params[1], params[2], *args)
+
+
+def cdf_gamma(gamma_data, theta_data, theta):
+
+    """
+    Compute the cumulative distribution function of a give orientation distribution function at a specified theta.
+
+    :param gamma_data: Array of ODF data
+    :type gamma_data: ndarray
+    :param theta_data: Array of theta values
+    :type theta_data: ndarray
+    :param theta: Argument of cdf. Radian in interval [-pi/2, pi/2]
+    :type theta: float
+    :return: Value of cdf at specified theta
+    :rtype: float
+    """
+
+    indices = theta_data <= theta
+
+    gammas = gamma_data[indices]
+    thetas = theta_data[indices]
+
+    return trapz(gammas, thetas)
+
+
+def IdistDiscrete(a0, a2, a4, phis, thetas):
+
+    """
+    Simulate signal intensity resulting from the convolution of a single fiber with a discretely sampled distribution
+
+    :param a0: a0 parameter
+    :type a0: float
+    :param a2: a2 parameter
+    :type a2: float
+    :param a4: a4 parameter
+    :type a4: float
+    :param phis: Preferred directions sampled from distribution
+    :type phis: ndarray
+    :param thetas: Values of theta at which to evaluate the cosine series. Values in radians
+    :type thetas: ndarray
+    :return: Distribution intensity values
+    :rtype: ndarray
+    """
+
+    rv = np.zeros((len(phis), len(thetas)))
+
+    for row in range(len(phis)):
+        rv[row, :] = IfiberRad(a0, a2, a4, phis[row], thetas)
+
+    rv = np.sum(rv, axis=0) / len(phis)
+
+    return rv
+
+
+def minimandDiscrete(a0, a2, a4, phis, thetas, data):
+
+    """
+    Minimand for computing the sum of squared differences between a discretely sampled distribution intensity signal and measured
+    data
+
+    :param a0: a0 parameter
+    :type a0: float
+    :param a2: a2 parameter
+    :type a2: float
+    :param a4: a4 parameter
+    :type a4: float
+    :param phis: Preferred directions sampled from distribution
+    :type phis: ndarray
+    :param thetas: Values of theta at which to evaluate the cosine series. Values in radians
+    :type thetas: ndarray
+    :param data: Measured signal array
+    :type data: ndarray
+    :return: Sum of square difference between data and proposed fit distribution.
+    :rtype: float
+    """
+
+    feval = IdistDiscrete(a0, a2, a4, phis, thetas)
+
+    diff = data - feval
+
+    diffsq = np.square(diff, diff)
+
+    ssd = np.sum(diffsq)
+
+    return ssd
+
+
+def minfunDiscrete(params, *args):
+
+    """
+    Wrapper function for discrete distribution fitting minimand. This function is to be passed to Scipy's minimization functions
+
+    :param params: List of minimization parameters: a0, a2, a4
+    :type params: list, ndarray
+    :param args: Tuple containing necessary arguments to ellipse minimand: (Phi, Thetas, Signal)
+    :type args: tuple
+    :return: Sum of square difference between data and proposed fit distribution.
+    :rtype: float
+    """
+
+    return minimandDiscrete(params[0], params[1], params[2], *args)

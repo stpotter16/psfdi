@@ -25,3 +25,4 @@ from matplotlib import patches
 from scipy.stats import beta
 from scipy.interpolate import interp1d
 from scipy.signal import fftconvolve
+from scipy.integrate import trapz
