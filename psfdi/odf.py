@@ -434,6 +434,10 @@ def wrapped_normal(mu, sigma, period, thetas):
 
     wn = 1 / (sigma * np.sqrt(period)) * np.sum(np.array(wn), axis=0)
 
+    area = trapz(wn, thetas)
+
+    wn = wn / area
+
     return wn
 
 
@@ -705,7 +709,12 @@ def sample_beta(mean, sd, nsamples):
     gamma = (mu ** 2 - mu ** 3 - sigma ** 2 * mu) / (sigma ** 2)
     delta = gamma * (1 - mu) / mu
 
-    samples = np.random.beta(gamma, delta, size=nsamples)
+    try:
+        samples = np.random.beta(gamma, delta, size=nsamples)
+    except ValueError:
+        samples = None
+        print('gamma = {}, delta = {}'.format(gamma, delta))
+        print('mu = {}, sigma = {}'.format(mu, sd))
 
     return samples
 
@@ -838,6 +847,8 @@ def minimandDistribution(mean, sd, a0, a2, a4, thetas, data):
     # Generate samples
     phis = sample_beta(mean, sd, 100000)  # Hard code number of samples
 
+    phis = phis * np.pi - np.pi / 2 * np.ones(len(phis))
+
     feval = IdistDiscrete(a0, a2, a4, phis, thetas)
 
     diff = data - feval
@@ -862,3 +873,5 @@ def minfunDistribution(params, *args):
     :return: Sum of square difference between data and proposed fit distribution.
     :rtype: float
     """
+
+    return minimandDistribution(params[0], params[1], *args)
