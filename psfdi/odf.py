@@ -752,10 +752,9 @@ def IdistDiscrete(a0, a2, a4, phis, thetas):
     :rtype: ndarray
     """
 
-    rv = np.zeros((len(phis), len(thetas)))
+    rv = [IfiberRad(a0, a2, a4, phi, thetas) for phi in phis]
 
-    for row in range(len(phis)):
-        rv[row, :] = IfiberRad(a0, a2, a4, phis[row], thetas)
+    rv = np.array(rv)
 
     rv = np.sum(rv, axis=0) / len(phis)
 
