@@ -764,8 +764,8 @@ def IdistDiscrete(a0, a2, a4, phis, thetas):
 def minimandDiscrete(a0, a2, a4, phis, thetas, data):
 
     """
-    Minimand for computing the sum of squared differences between a discretely sampled distribution intensity signal and measured
-    data
+    Minimand for computing the sum of squared differences between a discretely sampled distribution intensity signal
+    and measured data when the single fiber cosine series coefficients are being changed.
 
     :param a0: a0 parameter
     :type a0: float
@@ -797,7 +797,8 @@ def minimandDiscrete(a0, a2, a4, phis, thetas, data):
 def minfunDiscrete(params, *args):
 
     """
-    Wrapper function for discrete distribution fitting minimand. This function is to be passed to Scipy's minimization functions
+    Wrapper function for discrete distribution fitting minimand. This function is to be passed to Scipy's minimization
+    functions
 
     :param params: List of minimization parameters: a0, a2, a4
     :type params: list, ndarray
@@ -808,3 +809,56 @@ def minfunDiscrete(params, *args):
     """
 
     return minimandDiscrete(params[0], params[1], params[2], *args)
+
+
+def minimandDistribution(mean, sd, a0, a2, a4, thetas, data):
+
+    """
+    Minimand for computing the sum of squared differences between a discretely sampled distribution intensity signal
+    and measured data when the distribution statistics are being changed.
+
+    :param mean: Mean of beta distribution. Radian value in interval [-pi/2, pi/2]
+    :type mean: float
+    :param sd: Standard deviation of beta distribution. Radian value in interval [0, pi/2]
+    :type sd: float
+    :param a0: a0 parameter
+    :type a0: float
+    :param a2: a2 parameter
+    :type a2: float
+    :param a4: a4 parameter
+    :type a4: float
+    :param thetas: Values of theta at which to evaluate the cosine series. Values in radians
+    :type thetas: ndarray
+    :param data: Measured signal array
+    :type data: ndarray
+    :return: Sum of square difference between data and proposed fit distribution.
+    :rtype: float
+    """
+
+    # Generate samples
+    phis = sample_beta(mean, sd, 100000)  # Hard code number of samples
+
+    feval = IdistDiscrete(a0, a2, a4, phis, thetas)
+
+    diff = data - feval
+
+    diffsq = np.square(diff, diff)
+
+    ssd = np.sum(diffsq)
+
+    return ssd
+
+
+def minfunDistribution(params, *args):
+
+    """
+    Wrapper function for discrete distribution fitting minimand. This function is to be passed to Scipy's minimization
+    functions
+
+    :param params: List of minimization parameters: mean, sd
+    :type params: list, ndarray
+    :param args: Tuple containing necessary arguments to ellipse minimand: (a0, a2, a4, Thetas, Signal)
+    :type args: tuple
+    :return: Sum of square difference between data and proposed fit distribution.
+    :rtype: float
+    """
