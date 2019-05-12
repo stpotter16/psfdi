@@ -134,7 +134,7 @@ def register(image, target_image, niters=5000, eps=1e-5):
 
     criteria = (cv2.TERM_CRITERIA_COUNT | cv2.TERM_CRITERIA_EPS, niters, eps)
 
-    (cc, warp_matrix) = cv2.findTransformECC(target_image, image, warp_matrix, warp_mode, criteria)
+    (cc, warp_matrix) = cv2.findTransformECC(target_image, image, warp_matrix, warp_mode, criteria, None, 5)
 
     # Wrap warp outputs into a dict
     warp_dict['cc'] = cc
