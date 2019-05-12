@@ -682,6 +682,34 @@ def minfunBeta(params, *args):
     return minimandBeta(params[0], params[1], params[2], *args)
 
 
+def sample_beta(mean, sd, nsamples):
+
+    """
+    Generate specified number of samples from user-specified beta distribution.
+
+    :param mean: Mean of beta distribution. Radian value in interval [-pi/2, pi/2]
+    :type mean: float
+    :param sd: Standard deviation of beta distribution. Radian value in interval [0, pi/2]
+    :type sd: float
+    :param nsamples: Number of samples to draw
+    :type nsamples: int
+    :return: Samples drawn from the beta distribution
+    :rtype: ndarray
+    """
+
+    # Map mean and standard deviation to [0, 1] range of the standard beta distribution
+    mu = (mean + np.pi / 2) / np.pi
+    sigma = sd / np.pi
+
+    # Compute the shape parameters
+    gamma = (mu ** 2 - mu ** 3 - sigma ** 2 * mu) / (sigma ** 2)
+    delta = gamma * (1 - mu) / mu
+
+    samples = np.random.beta(gamma, delta, size=nsamples)
+
+    return samples
+
+
 def cdf_gamma(gamma_data, theta_data, theta):
 
     """
