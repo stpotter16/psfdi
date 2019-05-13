@@ -889,9 +889,9 @@ def minimandDistribution(mean, sd, a0, a2, a4, thetas, data):
     Minimand for computing the sum of squared differences between a discretely sampled distribution intensity signal
     and measured data when the distribution statistics are being changed.
 
-    :param mean: Mean of beta distribution. Radian value in interval [-pi/2, pi/2]
+    :param mean: Mean of wrapped normal distribution. Radian value in interval [-pi/2, pi/2]
     :type mean: float
-    :param sd: Standard deviation of beta distribution. Radian value in interval [0, pi/2]
+    :param sd: Standard deviation of wrapped normal distribution. Radian value in interval [0, pi/2]
     :type sd: float
     :param a0: a0 parameter
     :type a0: float
@@ -908,9 +908,7 @@ def minimandDistribution(mean, sd, a0, a2, a4, thetas, data):
     """
 
     # Generate samples
-    phis = sample_beta(mean, sd, 100000)  # Hard code number of samples
-
-    phis = phis * np.pi - np.pi / 2 * np.ones(len(phis))
+    phis = sample_wrappednormal(mean, sd, np.pi, 100000)  # Hard code number of samples
 
     feval = IdistDiscrete(a0, a2, a4, phis, thetas)
 
