@@ -441,6 +441,69 @@ def wrapped_normal(mu, sigma, period, thetas):
     return wn
 
 
+def cdf_wrappednormal(mu, sigma, period, theta):
+
+    """
+    Compute the CDF of a wrapped normal distribution
+
+    :param mu: mean
+    :type mu: float
+    :param sigma: standard deviation
+    :type sigma: float
+    :param period: Shift period
+    :type period: float
+    :param theta: Theta parameter
+    :type theta: float
+    :return: CDF of distribution
+    :rtype: float
+    """
+
+    thetas = np.linspace(-np.pi / 2, np.pi / 2, 1000)
+
+    wn = wrapped_normal(mu, sigma, period, thetas)
+
+    indices = thetas <= theta
+
+    wns = wn[indices]
+    thetas = thetas[indices]
+
+    cdf = trapz(wns, thetas)
+
+    return cdf
+
+
+def sample_wrappednormal(mu, sigma, period, nsamples):
+
+    """
+    Generate samples from a wrapped normal distribution with specified mean and standard deviation
+
+    :param mu: mean
+    :type mu: float
+    :param sigma: standard deviation
+    :type sigma: float
+    :param period: Shift period
+    :type period: float
+    :param nsamples: Number of samples to draw
+    :type nsamples: int
+    :return: Array of samples drawn from specified wrapped normal distribution
+    :rtype: ndarray
+    """
+
+    cdf_wn = cdf_wrappednormal
+
+    # Create theta arrays
+    gen_thetas = np.linspace(-np.pi / 2, np.pi / 2, 1000)
+
+    # Generate CDF
+    eval_cdf = np.array([cdf_wn(mu, sigma, period, theta) for theta in gen_thetas])
+
+    usamples = np.random.uniform(0, 1, nsamples)
+
+    samples = [gen_thetas[np.argwhere(eval_cdf == min(eval_cdf[(eval_cdf - s) > 0]))][0][0] for s in usamples]
+
+    return np.array(samples)
+
+
 def IfiberRad(a0, a2, a4, phi, theta):
 
     """
