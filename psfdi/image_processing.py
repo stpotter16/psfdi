@@ -8,6 +8,7 @@
 
 from . import np
 from . import cv2
+from . import sys
 
 
 def demodulate(I0, I120, I240, polar_res, polar_max):
@@ -134,7 +135,10 @@ def register(image, target_image, niters=5000, eps=1e-5):
 
     criteria = (cv2.TERM_CRITERIA_COUNT | cv2.TERM_CRITERIA_EPS, niters, eps)
 
-    (cc, warp_matrix) = cv2.findTransformECC(target_image, image, warp_matrix, warp_mode, criteria, None, 5)
+    if sys.platform == 'win32':
+        (cc, warp_matrix) = cv2.findTransformECC(target_image, image, warp_matrix, warp_mode, criteria, None, 5)
+    else:
+        (cc, warp_matrix) = cv2.findTransformECC(target_image, image, warp_matrix, warp_mode, criteria)
 
     # Wrap warp outputs into a dict
     warp_dict['cc'] = cc
