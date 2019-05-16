@@ -610,6 +610,64 @@ def minfunWrappedNormal(params, *args):
     return minimandWrappedNormal(params[0], params[1], params[2], *args)
 
 
+def minimandWrappedNormalODF(mu, sd, a0, a2, a4, phi, thetas, data):
+
+    """
+    Minimand for computing the mean and standard deviation of an assumed wrapped normal distribution of fibers.
+
+    ::param mu: Mean of proposed wrapped normal distribution
+    :type mu: float
+    :param sd: Standard deviation of propsed wrapped normal distribution
+    :type sd: float
+    param a0: a0 parameter
+    :type a0: float
+    :param a2: a2 parameter
+    :type a2: float
+    :param a4: a4 parameter
+    :type a4: float
+    :param phi: preferred fiber direction in degrees
+    :type phi: float
+    :param thetas: Values of theta at which to evaluate the cosine series. Values in radians
+    :type thetas: ndarray
+    :param data: Measured signal array
+    :type data: ndarray
+    :return: Sum of square difference between data and proposed fit distribution.
+    :rtype: float
+    """
+
+    # Compute the distribution
+    dist = wrapped_normal(mu, sd, np.pi, thetas)
+
+    # Compute the guess distribution signal
+    guess = IdistWrappedNormal(a0, a2, a4, phi, thetas, dist)
+
+    diff = data[:, 1] - guess
+
+    diffsq = np.square(diff, diff)
+
+    ssd = np.sum(diffsq)
+
+    return ssd
+
+
+def minfunWrappedNormalODF(params, *args):
+
+    """
+    Wrapper function for wrapped normal distribution fitting minimand.
+    This function is to be passed to Scipy's minimization functions
+
+    :param params: List of minimization parameters: mu, sd
+    :type params: list, ndarray
+    :param args: Tuple containing necessary arguments to ellipse minimand:
+    (a0, a2, a4, Phi, Thetas, Distribution, Signal)
+    :type args: tuple
+    :return: Sum of square difference between data and proposed fit distribution.
+    :rtype: float
+    """
+
+    return minimandWrappedNormalODF(params[0], params[1], *args)
+
+
 def beta_dist(mean, sd):
 
     """
