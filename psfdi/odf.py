@@ -553,7 +553,7 @@ def IdistWrappedNormal(a0, a2, a4, phi, thetas, dist):
 
     delta = thetas[1] - thetas[0]
 
-    return fftconvolve(dist, fiber, 'same') * delta
+    return fftconvolve(dist, fiber - a0, 'same') * delta + a0
 
 
 def minimandWrappedNormal(a0, a2, a4, phi, thetas, dist, data):
