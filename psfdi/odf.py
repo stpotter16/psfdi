@@ -658,7 +658,7 @@ def minfunWrappedNormalODF(params, *args):
 
     :param params: List of minimization parameters: mu, sd
     :type params: list, ndarray
-    :param args: Tuple containing necessary arguments to ellipse minimand:
+    :param args: Tuple containing necessary arguments to distribution minimand:
     (a0, a2, a4, Phi, Thetas, Signal)
     :type args: tuple
     :return: Sum of square difference between data and proposed fit distribution.
@@ -676,7 +676,7 @@ def minfunWrappedNormalComposite(params, *args):
 
     :param params: List of minimization parameters: mu, sd, a0, a2, a4
     :type params: list, ndarray
-    :param args: Tuple containing necessary arguments to ellipse minimand:
+    :param args: Tuple containing necessary arguments to distribution minimand:
     (Phi, Thetas, Signal)
     :type args: tuple
     :return: Sum of square difference between data and proposed fit distribution.
@@ -684,6 +684,24 @@ def minfunWrappedNormalComposite(params, *args):
     """
 
     return minimandWrappedNormalODF(params[0], params[1], params[2], params[3], params[4], *args)
+
+
+def minfunWrappedNormalCompositePhi(params, *args):
+
+    """
+    Wrapper function for wrapped normal distribution fitting for both distribution parameters and single fiber terms.
+    This function is to be passed to Scipy's minimization functions
+
+    :param params: List of minimization parameters: mu, sd, a0, a2, a4, phi
+    :type params: list, ndarray
+    :param args: Tuple containing necessary arguments to distribution minimand:
+    (Thetas, Signal)
+    :type args: tuple
+    :return: Sum of square difference between data and proposed fit distribution.
+    :rtype: float
+    """
+
+    return minimandWrappedNormalODF(params[0], params[1], params[2], params[3], params[4], params[5], *args)
 
 
 def beta_dist(mean, sd):
