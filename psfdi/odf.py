@@ -1030,3 +1030,32 @@ def minfunDistribution(params, *args):
     """
 
     return minimandDistribution(params[0], params[1], *args)
+
+
+def IdistODF(a0, a2, a4, phi, thetas, odf):
+
+    """
+    Simulate signal intensity resulting from the convolution of a single fiber with the SALS ODF signal
+
+    :param a0: a0 parameter
+    :type a0: float
+    :param a2: a2 parameter
+    :type a2: float
+    :param a4: a4 parameter
+    :type a4: float
+    :param phi: preferred fiber direction in degrees
+    :type phi: float
+    :param thetas: Values of theta at which to evaluate the cosine series. Values in radians
+    :type thetas: ndarray
+    :param odf: Values of SALS ODF at the theta values
+    :type odf: ndarray
+    :return: Distribution intensity values
+    :rtype: ndarray
+    """
+
+    fiber = IfiberRad(a0, a2, a4, phi, thetas)
+
+    delta = thetas[1] - thetas[0]
+
+    return fftconvolve(odf, fiber - a0, 'same') * delta + a0
+
