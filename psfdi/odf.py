@@ -1059,3 +1059,58 @@ def IdistODF(a0, a2, a4, phi, thetas, odf):
 
     return fftconvolve(odf, fiber - a0, 'same') * delta + a0
 
+
+def minimandODF(a0, a2, a4, phi, thetas, odf, data):
+
+    """
+
+    Minimand for computing the sum of squared differences between a ODF intensity signal and measured
+    data
+
+    :param a0: a0 parameter
+    :type a0: float
+    :param a2: a2 parameter
+    :type a2: float
+    :param a4: a4 parameter
+    :type a4: float
+    :param phi: preferred fiber direction in degrees
+    :type phi: float
+    :param thetas: Values of theta at which to evaluate the cosine series. Values in radians
+    :type thetas: ndarray
+    :param odf: Values of the wrapped normal pdf at the theta values
+    :type odf: ndarray
+    :param data: Measured signal array
+    :type data: ndarray
+    :return: Sum of square difference between data and proposed fit distribution.
+    :rtype: float
+    """
+
+    guess = IdistODF(a0, a2, a4, phi, thetas, odf)
+
+    guess_interp = interp1d(thetas, guess)
+
+    feval = guess_interp(data[:, 0])
+
+    diff = data[:, 1] - feval
+
+    diffsq = np.square(diff, diff)
+
+    ssd = np.sum(diffsq)
+
+    return ssd
+
+
+def minfunODF(params, *args):
+
+    """
+    Wrapper function for ODF fitting minimand. This function is to be passed to Scipy's minimization functions
+
+    :param params: List of minimization parameters: a0, a2, a4
+    :type params: list, ndarray
+    :param args: Tuple containing necessary arguments to ellipse minimand: (Phi, Thetas, ODF, Signal)
+    :type args: tuple
+    :return: Sum of square difference between data and proposed fit distribution.
+    :rtype: float
+    """
+
+    return minimandODF(params[0], params[1], params[2], *args)
