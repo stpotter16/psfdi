@@ -1087,11 +1087,7 @@ def minimandODF(a0, a2, a4, phi, thetas, odf, data):
 
     guess = IdistODF(a0, a2, a4, phi, thetas, odf)
 
-    guess_interp = interp1d(thetas, guess)
-
-    feval = guess_interp(data[:, 0])
-
-    diff = data[:, 1] - feval
+    diff = data[:, 1] - guess
 
     diffsq = np.square(diff, diff)
 
